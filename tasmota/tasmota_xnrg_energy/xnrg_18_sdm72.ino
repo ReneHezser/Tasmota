@@ -42,6 +42,7 @@ TasmotaModbus *Sdm72Modbus;
 const uint16_t sdm72_register[] {
   0x0034,   // 0 SDM72D_POWER               [W]
   0x0156,   // 3 SDM72D_TOTAL_ACTIVE        [kWh]
+  0x0046,   // 6 SDM72D_FREQUENCY           [Hz]
 #ifdef SDM72_IMPEXP
   0x0500,   // 1 SDM72D_IMPORT_POWER        [W]
   0x0502,   // 2 SDM72D_EXPORT_POWER        [W]
@@ -93,20 +94,24 @@ void Sdm72Every250ms(void)
           Sdm72.total_active = value;         // kWh
           break;
 
-#ifdef SDM72_IMPEXP
         case 2:
+          Energy.frequency[0] = value;        // Hz
+          break;
+
+#ifdef SDM72_IMPEXP
+        case 3:
           Sdm72.import_power = value;         // W
           break;
 
-        case 3:
+        case 4:
           Sdm72.export_power = value;         // W
           break;
 
-        case 4:
+        case 5:
           Energy.import_active[0] = value;    // kWh
           break;
 
-        case 5:
+        case 6:
           Energy.export_active[0] = value;    // kWh
           break;
 #endif  //  SDM72_IMPEXP
@@ -136,6 +141,7 @@ void Sdm72SnsInit(void)
     if (2 == result) {
         ClaimSerial();
     }
+    Energy.frequency_common = true;             // Use common frequency
   } else {
     TasmotaGlobal.energy_driver = ENERGY_NONE;
   }
